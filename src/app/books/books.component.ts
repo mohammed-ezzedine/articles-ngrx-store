@@ -1,8 +1,11 @@
-import { Component } from '@angular/core';
-import { Observable, of } from "rxjs";
+import { Component, OnInit } from '@angular/core';
+import { Observable } from "rxjs";
 import { Book } from "./book";
-import { AsyncPipe, CommonModule, NgForOf } from "@angular/common";
-import { BooksService } from "./books.service";
+import { AsyncPipe, CommonModule } from "@angular/common";
+import { AppState } from "../app.state";
+import { Store } from "@ngrx/store";
+import { selectBooks } from "./state/books.selectors";
+import { fetchBooksCommand } from "./state/books.actions";
 
 @Component({
   selector: 'app-books',
@@ -11,16 +14,17 @@ import { BooksService } from "./books.service";
     CommonModule,
     AsyncPipe
   ],
-  providers: [
-    BooksService
-  ],
   templateUrl: './books.component.html',
   styleUrl: './books.component.css'
 })
-export class BooksComponent {
+export class BooksComponent implements OnInit {
   books$: Observable<Book[]>
 
-  constructor(private service: BooksService) {
-    this.books$ = this.service.getBooks();
+  constructor(private store: Store<AppState>) {
+    this.books$ = this.store.select(selectBooks);
+  }
+
+  ngOnInit(): void {
+    this.store.dispatch(fetchBooksCommand())
   }
 }
